@@ -3,34 +3,63 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>生産データ入力（ミニ）</title>
+  <title>生産データ入力（ミニ・v2）</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
   <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h1 class="h4 m-0">生産データ入力（ミニ）</h1>
-      <a href="/records" class="btn btn-outline-secondary">履歴</a>
+      <h1 class="h4 m-0">生産データ入力（v2）</h1>
+      <div class="d-flex gap-2">
+        <a href="/records" class="btn btn-outline-secondary btn-sm">履歴</a>
+        <a href="/export" class="btn btn-success btn-sm">CSV</a>
+      </div>
     </div>
 
     <form method="post" action="/submit" class="card p-3 shadow-sm">
+      <!-- 勤務帯 A/B/C -->
       <div class="mb-3">
-        <label class="form-label">作業者名</label>
-        <input name="operator" class="form-control form-control-lg"
-               placeholder="例）山田" autocomplete="off" required autofocus>
+        <label class="form-label">勤務帯</label>
+        <select name="shift" class="form-select form-select-lg" required>
+          <option value="" selected disabled>選択してください</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+        </select>
       </div>
 
+      <!-- 号機 2~6 -->
       <div class="mb-3">
-        <label class="form-label">機械番号</label>
-        <!-- datalist で候補を出しつつ自由入力もOK -->
-        <input name="machine" class="form-control form-control-lg"
-               list="machines" placeholder="例）2号機 / 1〜6" required>
-        <datalist id="machines">
-          <option value="1"><option value="2"><option value="3">
-          <option value="4"><option value="5"><option value="6">
-        </datalist>
+        <label class="form-label">号機</label>
+        <select name="machine" class="form-select form-select-lg" required>
+          <option value="" selected disabled>選択してください</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
       </div>
 
+      <!-- 機種名 sample1~10 -->
+      <div class="mb-3">
+        <label class="form-label">機種名</label>
+        <select name="model" class="form-select form-select-lg" required>
+          <option value="" selected disabled>選択してください</option>
+          <option value="sample1">sample1</option>
+          <option value="sample2">sample2</option>
+          <option value="sample3">sample3</option>
+          <option value="sample4">sample4</option>
+          <option value="sample5">sample5</option>
+          <option value="sample6">sample6</option>
+          <option value="sample7">sample7</option>
+          <option value="sample8">sample8</option>
+          <option value="sample9">sample9</option>
+          <option value="sample10">sample10</option>
+        </select>
+      </div>
+
+      <!-- ショット数 -->
       <div class="mb-3">
         <label class="form-label">ショット数</label>
         <input name="shots" type="number" min="0" inputmode="numeric" pattern="\d*"
