@@ -1,11 +1,12 @@
 from datetime import date, datetime
-from flask import Flask, render_template, request, redirect, url_for, send_file, flash
+from flask import Flask, render_template, request, redirect, url_for, send_file, flash, session
 from sqlalchemy import create_engine, Column, Integer, String, Date, Float, Text, inspect
 from sqlalchemy.orm import declarative_base, sessionmaker
 import pandas as pd
 
 app = Flask(__name__)
-app.secret_key = "change-me"  # フラッシュメッセージ用
+app.config["SESSION_PERMANENT"] = False
+app.secret_key = "change-me"  # フラッシュ/セッション用（任意のランダム文字列に）
 
 # --- DB セットアップ（SQLite） ---
 DB_PATH = "production_log.db"
@@ -27,34 +28,37 @@ class Entry(Base):
     machine_no = Column(Integer, nullable=False)        # 号機 2..6
     model_name = Column(String(50), nullable=False)     # 機種名
 
-    # ▼ 実測値（モニタ値） — 全て必須扱い（アプリ側でバリデーション）
+    # ▼ 実測値（モニタ値）— アプリ側で必須扱い
     inj_time = Column(Float, nullable=True)             # 射出時間(s, 0.001)
     metering_time = Column(Float, nullable=True)        # 計量時間(s, 0.01)
     vp_position = Column(Float, nullable=True)          # V-P位置(mm, 0.001)
     vp_pressure = Column(Float, nullable=True)          # V-P圧力(MPa, 0.1)
     min_cushion = Column(Float, nullable=True)          # 最小クッション(mm, 0.01)
     peak_pressure = Column(Float, nullable=True)        # ピーク圧(MPa, 0.1)
-    cycle_time = Column(Float, nullable=True)           # サイクル時間(s, 0.01) ※前フィールド流用
-    shot_count = Column(Integer, nullable=True)         # 現在ショット数（必須扱い）
+    cycle_time = Column(Float, nullable=True)           # サイクル時間(s, 0.01)
+    shot_count = Column(Integer, nullable=True)         # 現在ショット数
 
-    # ▼ 将来の「成形条件」用に残しておくフィールド（任意入力のまま）
-    material = Column(String(50), nullable=True)        # 材料名
-    melt_temp = Column(Float, nullable=True)            # 樹脂温度(℃)
-    mold_temp = Column(Float, nullable=True)            # 金型温度(℃)
-    inj_pressure = Column(Float, nullable=True)         # 射出圧(MPa)
-    hold_pressure = Column(Float, nullable=True)        # 保圧(MPa)
-    note = Column(Text, nullable=True)                  # メモ
+    # ▼ 任意（将来の成形条件ブロックに統合予定）
+    material = Column(String(50), nullable=True)
+    melt_temp = Column(Float, nullable=True)
+    mold_temp = Column(Float, nullable=True)
+    inj_pressure = Column(Float, nullable=True)
+    hold_pressure = Column(Float, nullable=True)
+    note = Column(Text, nullable=True)
 
 def init_db():
-    # 初回のみ作成（既存テーブルがある場合は列追加等は行わない）
     if not inspect(engine).has_table("entries"):
         Base.metadata.create_all(bind=engine)
+
+# 号機選択画面
+@app.route("/select-machine")
+def select_machine():
+    return render_template("select_machine.html", machine_choices=MACHINE_CHOICES)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
         try:
-            # フォーム値を取得
             work_date_str = request.form.get("work_date") or date.today().isoformat()
             work_date = datetime.strptime(work_date_str, "%Y-%m-%d").date()
 
@@ -66,7 +70,6 @@ def index():
                 if val is None or val == "":
                     return None
                 try:
-                    # Windowsで小数点が「,」の入力に来ても置換
                     return float(str(val).replace(",", "."))
                 except ValueError:
                     return None
@@ -79,17 +82,17 @@ def index():
                 except ValueError:
                     return None
 
-            # --- 実測値（必須） ---
-            inj_time = to_float(request.form.get("inj_time"))            # 0.001 s
-            metering_time = to_float(request.form.get("metering_time"))  # 0.01 s
-            vp_position = to_float(request.form.get("vp_position"))      # 0.001 mm
-            vp_pressure = to_float(request.form.get("vp_pressure"))      # 0.1 MPa
-            min_cushion = to_float(request.form.get("min_cushion"))      # 0.01 mm
-            peak_pressure = to_float(request.form.get("peak_pressure"))  # 0.1 MPa
-            cycle_time = to_float(request.form.get("cycle_time"))        # 0.01 s
-            shot_count = to_int(request.form.get("shot_count"))          # int
+            # 実測値（必須）
+            inj_time = to_float(request.form.get("inj_time"))
+            metering_time = to_float(request.form.get("metering_time"))
+            vp_position = to_float(request.form.get("vp_position"))
+            vp_pressure = to_float(request.form.get("vp_pressure"))
+            min_cushion = to_float(request.form.get("min_cushion"))
+            peak_pressure = to_float(request.form.get("peak_pressure"))
+            cycle_time = to_float(request.form.get("cycle_time"))
+            shot_count = to_int(request.form.get("shot_count"))
 
-            # --- 任意（成形条件の前座：今は保存のみ） ---
+            # 任意
             material = request.form.get("material") or None
             melt_temp = to_float(request.form.get("melt_temp"))
             mold_temp = to_float(request.form.get("mold_temp"))
@@ -97,7 +100,7 @@ def index():
             hold_pressure = to_float(request.form.get("hold_pressure"))
             note = request.form.get("note") or None
 
-            # ざっくりバリデーション
+            # バリデーション
             errors = []
             if shift not in SHIFT_CHOICES:
                 errors.append("勤務帯の値が不正です。")
@@ -106,7 +109,6 @@ def index():
             if model_name not in MODEL_CHOICES:
                 errors.append("機種名の値が不正です。")
 
-            # 実測値は全て必須
             required_floats = {
                 "射出時間": inj_time,
                 "計量時間": metering_time,
@@ -133,7 +135,7 @@ def index():
                 return redirect(url_for("index"))
 
             # 保存
-            session = SessionLocal()
+            s = SessionLocal()
             entry = Entry(
                 work_date=work_date,
                 shift=shift,
@@ -154,43 +156,58 @@ def index():
                 hold_pressure=hold_pressure,
                 note=note,
             )
-            session.add(entry)
-            session.commit()
-            session.close()
+            s.add(entry)
+            s.commit()
+            s.close()
             flash("保存しました。", "success")
-            return redirect(url_for("index"))
+            # 連続入力のUX改善：フォーム再表示
+            return redirect(url_for("index", machine=machine_no))
         except Exception as e:
             flash(f"保存に失敗しました: {e}", "error")
             return redirect(url_for("index"))
 
-    # GET
+    # ---- GET ----
     today = date.today().isoformat()
+
+    # 優先: クエリ ?machine=5 > セッション > 未指定
+    q_machine = request.args.get("machine", type=int)
+    if q_machine in MACHINE_CHOICES:
+        session["machine"] = q_machine
+        preselected_machine = q_machine
+    else:
+        preselected_machine = session.get("machine")
+
+    # 号機未確定なら選択画面へ
+    if preselected_machine not in MACHINE_CHOICES:
+        return redirect(url_for("select_machine"))
+
     return render_template(
         "index.html",
         today=today,
         shift_choices=SHIFT_CHOICES,
         machine_choices=MACHINE_CHOICES,
         model_choices=MODEL_CHOICES,
+        preselected_machine=preselected_machine,
     )
 
 @app.route("/records")
 def records():
-    session = SessionLocal()
-    rows = (
-        session.query(Entry)
-        .order_by(Entry.work_date.desc(), Entry.id.desc())
-        .all()
-    )
-    session.close()
+    s = SessionLocal()
+    rows = s.query(Entry).order_by(Entry.work_date.desc(), Entry.id.desc()).all()
+    s.close()
     return render_template("records.html", rows=rows)
 
-@app.route("/export")
+@app.route("/export", endpoint="export")
 def export_csv():
-    # 全件をCSV出力
     df = pd.read_sql_table("entries", con=engine)
     export_path = "production_log_export.csv"
     df.to_csv(export_path, index=False, encoding="utf-8-sig")
     return send_file(export_path, as_attachment=True)
+
+# 簡易疎通
+@app.route("/ping")
+def ping():
+    return "pong"
 
 if __name__ == "__main__":
     init_db()

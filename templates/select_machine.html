@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>号機を選択</h2>
+<p style="margin:8px 0 16px;">入力する号機をタップしてください。</p>
+
+<div class="machine-grid">
+  {% for m in machine_choices %}
+    <a class="btn big" href="{{ url_for('index') }}?machine={{ m }}">#{{ m }}</a>
+  {% endfor %}
+</div>
+
+<style>
+.machine-grid{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap:12px;
+}
+.btn.big{
+  font-size:28px;
+  padding:20px 0;
+  text-align:center;
+  border-radius:14px;
+  touch-action: manipulation;
+}
+@media (max-width:480px){
+  .machine-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .btn.big{ font-size:24px; padding:18px 0; }
+}
+</style>
+{% endblock %}
