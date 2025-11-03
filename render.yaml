@@ -1,7 +1,7 @@
 services:
   - type: web
     name: data-entry-app
-    env: python
+    env: python              # そのままでOK。もしエラーが出たら runtime: python に変更
     plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app -b 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 120
@@ -13,7 +13,7 @@ services:
         value: /var/data/production_log.db
       - key: FLASK_DEBUG
         value: "0"
-    disks:
-      - name: data
-        mountPath: /var/data
-        sizeGB: 1
+    disk:                    # ← ここを単数に
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
