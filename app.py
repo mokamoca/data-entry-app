@@ -10,11 +10,24 @@ app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.secret_key = os.environ.get("SECRET_KEY", "change-me")
 
-# --- DB セットアップ（SQLite） ---
-DB_PATH = os.environ.get("DB_PATH", "production_log.db")
-engine = create_engine(f"sqlite:///{DB_PATH}", echo=False, future=True)
+# --- DB セットアップ（Postgres優先／なければSQLite） ---
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if DATABASE_URL:
+    # SQLAlchemyは "postgres://" を受け付けないので、必要なら置換
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)
+
+    # Renderの接続文字列は sslmode=require 付きなのでこのままでOK
+    engine = create_engine(DATABASE_URL, echo=False, future=True)
+else:
+    # ローカル開発や従来運用のフォールバック（SQLite）
+    DB_PATH = os.environ.get("DB_PATH", "production_log.db")
+    engine = create_engine(f"sqlite:///{DB_PATH}", echo=False, future=True)
+
 Base = declarative_base()
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+
 
 # 選択肢（必要に応じて編集）
 SHIFT_CHOICES = ["A", "B", "C"]
