@@ -1,7 +1,8 @@
 services:
   - type: web
     name: data-entry-app
-    env: python
+    runtime: python          # ← 変更
+    pythonVersion: 3.12.6    # ← 追加
     plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app -b 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 120
@@ -11,9 +12,9 @@ services:
         generateValue: true
       - key: FLASK_DEBUG
         value: "0"
-      - key: DATABASE_URL               # ← ここがポイント
+      - key: DATABASE_URL
         fromDatabase:
-          name: data-entry-db           # ← 下の databases の name と一致させる
+          name: data-entry-db
           property: connectionString
 
 databases:
