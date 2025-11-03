@@ -1,7 +1,7 @@
 services:
   - type: web
     name: data-entry-app
-    env: python      # ← ここは runtime: ではなく env: のままでOK
+    env: python
     plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app -b 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 120
@@ -15,7 +15,8 @@ services:
         fromDatabase:
           name: data-entry-db
           property: connectionString
-
+      - key: PYTHON_VERSION          # ← これを追加
+        value: 3.12.6
 databases:
   - name: data-entry-db
     plan: free
