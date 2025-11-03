@@ -1,8 +1,7 @@
 services:
   - type: web
     name: data-entry-app
-    runtime: python          # ← 変更
-    pythonVersion: 3.12.6    # ← 追加
+    env: python      # ← ここは runtime: ではなく env: のままでOK
     plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app -b 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 120
