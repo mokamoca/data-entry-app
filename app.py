@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from flask import Flask, render_template, request, redirect, url_for, send_file, flash, session
+from sqlalchemy import inspect  # これを追加
 from sqlalchemy import create_engine, Column, Integer, String, Date, Float, Text, inspect
 from sqlalchemy.orm import declarative_base, sessionmaker
 import pandas as pd
@@ -62,8 +63,13 @@ class Entry(Base):
     note = Column(Text, nullable=True)
 
 def init_db():
-    if not inspect(engine).has_table("entries"):
+    insp = inspect(engine)
+    # Postgresは最初は空なので、entriesテーブルが無ければ作成
+    if not insp.has_table("entries"):
         Base.metadata.create_all(bind=engine)
+
+# テーブルを初期化（初回のみ作成）
+init_db()
 
 # 号機選択画面
 @app.route("/select-machine")
