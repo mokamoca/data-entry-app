@@ -3,13 +3,15 @@ from flask import Flask, render_template, request, redirect, url_for, send_file,
 from sqlalchemy import create_engine, Column, Integer, String, Date, Float, Text, inspect
 from sqlalchemy.orm import declarative_base, sessionmaker
 import pandas as pd
+import os
+
 
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
-app.secret_key = "change-me"  # フラッシュ/セッション用（任意のランダム文字列に）
+app.secret_key = os.environ.get("SECRET_KEY", "change-me")
 
 # --- DB セットアップ（SQLite） ---
-DB_PATH = "production_log.db"
+DB_PATH = os.environ.get("DB_PATH", "production_log.db")
 engine = create_engine(f"sqlite:///{DB_PATH}", echo=False, future=True)
 Base = declarative_base()
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
