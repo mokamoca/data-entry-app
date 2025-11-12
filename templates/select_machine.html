@@ -1,30 +1,40 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>号機を選択</h2>
-<p style="margin:8px 0 16px;">入力する号機をタップしてください。</p>
-
-<div class="machine-grid">
-  {% for m in machine_choices %}
-    <a class="btn big" href="{{ url_for('index') }}?machine={{ m }}">#{{ m }}</a>
-  {% endfor %}
-</div>
-
 <style>
-.machine-grid{
-  display:grid;
-  grid-template-columns: repeat(3, minmax(0,1fr));
-  gap:12px;
-}
-.btn.big{
-  font-size:28px;
-  padding:20px 0;
-  text-align:center;
-  border-radius:14px;
-  touch-action: manipulation;
-}
-@media (max-width:480px){
-  .machine-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .btn.big{ font-size:24px; padding:18px 0; }
-}
+  .machine-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .machine-grid a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 0;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--fg);
+    text-decoration: none;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
+    transition: transform .1s, box-shadow .1s;
+  }
+  .machine-grid a:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+  }
 </style>
+
+<div class="card">
+  <h2>号機を選択</h2>
+  <p style="margin:0;color:var(--muted);font-size:.9rem;">QR コードからアクセスした場合もここで再選択できます。</p>
+  <div class="machine-grid">
+    {% for m in machine_choices %}
+      <a href="{{ url_for('main.index') }}?machine={{ m }}">#{{ m }}</a>
+    {% endfor %}
+  </div>
+</div>
 {% endblock %}
