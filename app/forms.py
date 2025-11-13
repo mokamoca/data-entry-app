@@ -13,6 +13,8 @@ from wtforms import (
 )
 from wtforms import validators
 
+REQUIRED_MESSAGE = "この項目は必須です。"
+
 
 def _build_choice_tuples(values: Sequence, include_blank=False):
     choices = []
@@ -27,65 +29,89 @@ class EntryForm(FlaskForm):
     work_date = DateField(
         "日付",
         default=date.today,
-        validators=[validators.DataRequired()],
+        validators=[validators.DataRequired(message=REQUIRED_MESSAGE)],
         render_kw={"inputmode": "numeric"},
     )
-    shift = SelectField("勤務帯", validators=[validators.DataRequired()])
-    machine_no = SelectField("号機", validators=[validators.DataRequired()])
-    model_name = SelectField("機種名", validators=[validators.DataRequired()])
+    shift = SelectField("勤務帯", validators=[validators.DataRequired(message=REQUIRED_MESSAGE)])
+    machine_no = SelectField("号機", validators=[validators.DataRequired(message=REQUIRED_MESSAGE)])
+    model_name = SelectField("機種名", validators=[validators.DataRequired(message=REQUIRED_MESSAGE)])
 
     inj_time = DecimalField(
         "射出時間 (s)",
         places=3,
         rounding=None,
-        validators=[validators.InputRequired(), validators.NumberRange(min=0)],
+        validators=[
+            validators.InputRequired(message=REQUIRED_MESSAGE),
+            validators.NumberRange(min=0),
+        ],
         render_kw={"step": "0.001", "placeholder": "0.350", "inputmode": "decimal"},
     )
     metering_time = DecimalField(
         "計量時間 (s)",
         places=2,
         rounding=None,
-        validators=[validators.InputRequired(), validators.NumberRange(min=0)],
+        validators=[
+            validators.InputRequired(message=REQUIRED_MESSAGE),
+            validators.NumberRange(min=0),
+        ],
         render_kw={"step": "0.01", "placeholder": "1.25", "inputmode": "decimal"},
     )
     vp_position = DecimalField(
         "V-P位置 (mm)",
         places=3,
         rounding=None,
-        validators=[validators.InputRequired(), validators.NumberRange(min=0)],
+        validators=[
+            validators.InputRequired(message=REQUIRED_MESSAGE),
+            validators.NumberRange(min=0),
+        ],
         render_kw={"step": "0.001", "placeholder": "12.345", "inputmode": "decimal"},
     )
     vp_pressure = DecimalField(
         "V-P圧力 (MPa)",
         places=1,
         rounding=None,
-        validators=[validators.InputRequired(), validators.NumberRange(min=0)],
+        validators=[
+            validators.InputRequired(message=REQUIRED_MESSAGE),
+            validators.NumberRange(min=0),
+        ],
         render_kw={"step": "0.1", "placeholder": "85.4", "inputmode": "decimal"},
     )
     min_cushion = DecimalField(
         "最小クッション (mm)",
         places=2,
         rounding=None,
-        validators=[validators.InputRequired(), validators.NumberRange(min=0)],
+        validators=[
+            validators.InputRequired(message=REQUIRED_MESSAGE),
+            validators.NumberRange(min=0),
+        ],
         render_kw={"step": "0.01", "placeholder": "0.30", "inputmode": "decimal"},
     )
     peak_pressure = DecimalField(
         "ピーク圧 (MPa)",
         places=1,
         rounding=None,
-        validators=[validators.InputRequired(), validators.NumberRange(min=0)],
+        validators=[
+            validators.InputRequired(message=REQUIRED_MESSAGE),
+            validators.NumberRange(min=0),
+        ],
         render_kw={"step": "0.1", "placeholder": "120.5", "inputmode": "decimal"},
     )
     cycle_time = DecimalField(
         "サイクル時間 (s)",
         places=2,
         rounding=None,
-        validators=[validators.InputRequired(), validators.NumberRange(min=0)],
+        validators=[
+            validators.InputRequired(message=REQUIRED_MESSAGE),
+            validators.NumberRange(min=0),
+        ],
         render_kw={"step": "0.01", "placeholder": "32.50", "inputmode": "decimal"},
     )
     shot_count = IntegerField(
         "現在ショット数",
-        validators=[validators.InputRequired(), validators.NumberRange(min=0)],
+        validators=[
+            validators.InputRequired(message=REQUIRED_MESSAGE),
+            validators.NumberRange(min=0),
+        ],
         render_kw={"step": "1", "placeholder": "50", "inputmode": "numeric"},
     )
 
