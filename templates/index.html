@@ -34,12 +34,20 @@
   .field input,
   .field select,
   .field textarea {
-    border: 1px solid var(--border);
+    border: 1px solid var(--input-border, var(--border));
     border-radius: 12px;
     padding: 12px 14px;
     font-size: 1rem;
-    background: rgba(255,255,255,0.9);
-    color: var(--fg);
+    background: var(--input-bg, var(--card));
+    color: var(--input-fg, var(--fg));
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
   }
   textarea { min-height: 88px; resize: vertical; }
   .field small {
