@@ -1,42 +1,127 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>入力一覧</h2>
-<table>
-  <thead>
-    <tr>
-      <th>日付</th><th>勤</th><th>号機</th><th>機種</th>
-      <th>射出時間(s)</th><th>計量時間(s)</th><th>V-P位置(mm)</th>
-      <th>V-P圧力(MPa)</th><th>最小クッション(mm)</th><th>ピーク圧(MPa)</th>
-      <th>CT(s)</th><th>現在ショット</th>
-      <th>材料</th><th>樹脂温</th><th>金型温</th>
-      <th>射出圧</th><th>保圧</th><th>メモ</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for r in rows %}
-    <tr>
-      <td>{{ r.work_date }}</td>
-      <td>{{ r.shift }}</td>
-      <td>{{ r.machine_no }}</td>
-      <td>{{ r.model_name }}</td>
+<style>
+  .filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .filters label {
+    display: flex;
+    flex-direction: column;
+    font-size: .8rem;
+    color: var(--muted);
+    gap: 4px;
+  }
+  .filters input,
+  .filters select {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    font-size: .95rem;
+  }
+  .filters button {
+    border: none;
+    border-radius: 12px;
+    padding: 12px;
+    font-weight: 600;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+  }
+  .records-table {
+    overflow-x: auto;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: .75rem;
+    background: rgba(37, 99, 235, 0.15);
+    color: var(--accent-strong);
+  }
+</style>
 
-      <td>{{ r.inj_time }}</td>
-      <td>{{ r.metering_time }}</td>
-      <td>{{ r.vp_position }}</td>
-      <td>{{ r.vp_pressure }}</td>
-      <td>{{ r.min_cushion }}</td>
-      <td>{{ r.peak_pressure }}</td>
-      <td>{{ r.cycle_time }}</td>
-      <td>{{ r.shot_count }}</td>
+<div class="card">
+  <h2 style="margin-bottom:8px;">入力一覧</h2>
+  <p style="margin:0 0 16px;color:var(--muted);font-size:.9rem;">直近 {{ rows|length }} 件を表示中（最大 {{ records_limit }} 件）</p>
 
-      <td>{{ r.material or "" }}</td>
-      <td>{{ r.melt_temp or "" }}</td>
-      <td>{{ r.mold_temp or "" }}</td>
-      <td>{{ r.inj_pressure or "" }}</td>
-      <td>{{ r.hold_pressure or "" }}</td>
-      <td>{{ r.note or "" }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+  <form class="filters" method="get">
+    {{ form.hidden_tag() }}
+    <label>
+      {{ form.machine_no.label }}
+      {{ form.machine_no() }}
+    </label>
+    <label>
+      {{ form.shift.label }}
+      {{ form.shift() }}
+    </label>
+    <label>
+      {{ form.date_from.label }}
+      {{ form.date_from() }}
+    </label>
+    <label>
+      {{ form.date_to.label }}
+      {{ form.date_to() }}
+    </label>
+    <button type="submit">絞り込む</button>
+  </form>
+
+  <div class="records-table">
+    <table>
+      <thead>
+        <tr>
+          <th>日付</th>
+          <th>勤</th>
+          <th>号機</th>
+          <th>機種</th>
+          <th>射出(s)</th>
+          <th>計量(s)</th>
+          <th>V-P位置</th>
+          <th>V-P圧</th>
+          <th>クッション</th>
+          <th>ピーク</th>
+          <th>CT</th>
+          <th>ショット</th>
+          <th>材料</th>
+          <th>樹脂</th>
+          <th>金型</th>
+          <th>射出圧</th>
+          <th>保圧</th>
+          <th>メモ</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>
+            <td>{{ r.work_date }}</td>
+            <td>{{ r.shift }}</td>
+            <td><span class="pill">#{{ r.machine_no }}</span></td>
+            <td>{{ r.model_name }}</td>
+            <td>{{ "%.3f"|format(r.inj_time) if r.inj_time is not none else "-" }}</td>
+            <td>{{ "%.2f"|format(r.metering_time) if r.metering_time is not none else "-" }}</td>
+            <td>{{ "%.3f"|format(r.vp_position) if r.vp_position is not none else "-" }}</td>
+            <td>{{ "%.1f"|format(r.vp_pressure) if r.vp_pressure is not none else "-" }}</td>
+            <td>{{ "%.2f"|format(r.min_cushion) if r.min_cushion is not none else "-" }}</td>
+            <td>{{ "%.1f"|format(r.peak_pressure) if r.peak_pressure is not none else "-" }}</td>
+            <td>{{ "%.2f"|format(r.cycle_time) if r.cycle_time is not none else "-" }}</td>
+            <td>{{ r.shot_count if r.shot_count is not none else "-" }}</td>
+            <td>{{ r.material or "" }}</td>
+            <td>{{ r.melt_temp or "" }}</td>
+            <td>{{ r.mold_temp or "" }}</td>
+            <td>{{ r.inj_pressure or "" }}</td>
+            <td>{{ r.hold_pressure or "" }}</td>
+            <td>{{ r.note or "" }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="18" style="text-align:center; padding:24px;">該当データがありません。</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

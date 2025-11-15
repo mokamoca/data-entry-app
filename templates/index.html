@@ -1,119 +1,205 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>新規入力</h2>
-<form method="post">
-  <div class="row">
-    <label>日付</label>
-    <input type="date" name="work_date" value="{{ today }}">
+<style>
+  form.production-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .section {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .section:last-of-type { border-bottom: none; }
+  .section h3 {
+    margin: 0 0 16px;
+    font-size: 1rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  label.field {
+    display: flex;
+    flex-direction: column;
+    font-size: .85rem;
+    gap: 6px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    border: 1px solid var(--input-border, var(--border));
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 1rem;
+    background: var(--input-bg, var(--card));
+    color: var(--input-fg, var(--fg));
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+  textarea { min-height: 88px; resize: vertical; }
+  .field small {
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .header-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: .85rem;
+    background: rgba(37, 99, 235, 0.15);
+    color: var(--accent-strong);
+  }
+  .submit-row {
+    position: sticky;
+    bottom: 24px;
+    padding-top: 12px;
+    background: var(--card);
+  }
+  .submit-row button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    cursor: pointer;
+    width: 100%;
+  }
+  .errors {
+    margin-top: 4px;
+    color: var(--error);
+    font-size: .8rem;
+  }
+</style>
+
+<div class="card">
+  <div class="header-grid">
+    <div>
+      <h2 style="margin-bottom:4px;">新規入力</h2>
+      <p style="margin:0;color:var(--muted);font-size:.9rem;">現場での連続入力を意識したシンプルなフォーム</p>
+    </div>
+    {% if selected_machine %}
+      <span class="badge">#{{ selected_machine }} 号機に入力中</span>
+    {% endif %}
   </div>
 
-  <div class="row">
-    <label>勤務帯</label>
-    <select name="shift" required>
-      {% for s in shift_choices %}
-        <option value="{{ s }}">{{ s }}</option>
-      {% endfor %}
-    </select>
-  </div>
+  <form method="post" class="production-form" novalidate>
+    {{ form.hidden_tag() }}
 
-  <div class="row">
-    <label>号機</label>
-    <select name="machine_no" required>
-      {% for m in machine_choices %}
-        <option value="{{ m }}" {% if preselected_machine==m %}selected{% endif %}>{{ m }}</option>
-      {% endfor %}
-    </select>
-    <small style="grid-column:1/-1; color:#6b7280;">※ 選択画面やQRで指定した号機が反映されています（必要なら変更可）</small>
-  </div>
+    <div class="section">
+      <h3>基本情報</h3>
+      <div class="field-grid">
+        <label class="field">
+          {{ form.work_date.label }}
+          {{ form.work_date(class_="") }}
+          {% if form.work_date.errors %}<div class="errors">{{ form.work_date.errors[0] }}</div>{% endif %}
+        </label>
+        <label class="field">
+          {{ form.shift.label }}
+          {{ form.shift() }}
+          {% if form.shift.errors %}<div class="errors">{{ form.shift.errors[0] }}</div>{% endif %}
+        </label>
+        <label class="field">
+          {{ form.machine_no.label }}
+          {{ form.machine_no() }}
+          <small>QR または選択画面で指定した号機を表示</small>
+          {% if form.machine_no.errors %}<div class="errors">{{ form.machine_no.errors[0] }}</div>{% endif %}
+        </label>
+        <label class="field">
+          {{ form.model_name.label }}
+          {{ form.model_name() }}
+          {% if form.model_name.errors %}<div class="errors">{{ form.model_name.errors[0] }}</div>{% endif %}
+        </label>
+      </div>
+    </div>
 
-  <div class="row">
-    <label>機種名</label>
-    <select name="model_name" required>
-      {% for n in model_choices %}
-        <option value="{{ n }}">{{ n }}</option>
-      {% endfor %}
-    </select>
-  </div>
+    <div class="section">
+      <h3>実測値</h3>
+      <div class="field-grid">
+        {% for field in [form.inj_time, form.metering_time, form.vp_position, form.vp_pressure, form.min_cushion, form.peak_pressure, form.cycle_time, form.shot_count] %}
+          <label class="field">
+            {{ field.label }}
+            {{ field(step=field.render_kw.step if field.render_kw else None) }}
+            {% if field.errors %}
+              <div class="errors">{{ field.errors[0] }}</div>
+            {% endif %}
+          </label>
+        {% endfor %}
+      </div>
+    </div>
 
-  <hr>
-  <h3>実測値（モニタ値） <small style="font-weight:normal">(すべて必須)</small></h3>
+    <div class="section">
+      <h3>任意入力</h3>
+      <div class="field-grid">
+        <label class="field">
+          {{ form.material.label }}
+          {{ form.material(placeholder="例: PBT-GF30") }}
+          {% if form.material.errors %}<div class="errors">{{ form.material.errors[0] }}</div>{% endif %}
+        </label>
+        <label class="field">
+          {{ form.melt_temp.label }}
+          {{ form.melt_temp(step="0.1") }}
+          {% if form.melt_temp.errors %}<div class="errors">{{ form.melt_temp.errors[0] }}</div>{% endif %}
+        </label>
+        <label class="field">
+          {{ form.mold_temp.label }}
+          {{ form.mold_temp(step="0.1") }}
+          {% if form.mold_temp.errors %}<div class="errors">{{ form.mold_temp.errors[0] }}</div>{% endif %}
+        </label>
+        <label class="field">
+          {{ form.inj_pressure.label }}
+          {{ form.inj_pressure(step="0.1") }}
+          {% if form.inj_pressure.errors %}<div class="errors">{{ form.inj_pressure.errors[0] }}</div>{% endif %}
+        </label>
+        <label class="field">
+          {{ form.hold_pressure.label }}
+          {{ form.hold_pressure(step="0.1") }}
+          {% if form.hold_pressure.errors %}<div class="errors">{{ form.hold_pressure.errors[0] }}</div>{% endif %}
+        </label>
+        <label class="field" style="grid-column:1 / -1;">
+          {{ form.note.label }}
+          {{ form.note(placeholder="特記事項や異常を記載") }}
+          {% if form.note.errors %}<div class="errors">{{ form.note.errors[0] }}</div>{% endif %}
+        </label>
+      </div>
+    </div>
 
-  <div class="row">
-    <label>射出時間 (s)</label>
-    <input type="number" inputmode="decimal" step="0.001" min="0" name="inj_time" required placeholder="例: 0.350">
-  </div>
+    <div class="submit-row">
+      {{ form.submit(class_="") }}
+    </div>
+  </form>
+</div>
 
-  <div class="row">
-    <label>計量時間 (s)</label>
-    <input type="number" inputmode="decimal" step="0.01" min="0" name="metering_time" required placeholder="例: 1.25">
-  </div>
-
-  <div class="row">
-    <label>V-P位置 (mm)</label>
-    <input type="number" inputmode="decimal" step="0.001" min="0" name="vp_position" required placeholder="例: 12.345">
-  </div>
-
-  <div class="row">
-    <label>V-P圧力 (MPa)</label>
-    <input type="number" inputmode="decimal" step="0.1" min="0" name="vp_pressure" required placeholder="例: 85.4">
-  </div>
-
-  <div class="row">
-    <label>最小クッション (mm)</label>
-    <input type="number" inputmode="decimal" step="0.01" min="0" name="min_cushion" required placeholder="例: 0.30">
-  </div>
-
-  <div class="row">
-    <label>ピーク圧 (MPa)</label>
-    <input type="number" inputmode="decimal" step="0.1" min="0" name="peak_pressure" required placeholder="例: 120.5">
-  </div>
-
-  <div class="row">
-    <label>サイクル時間 (s)</label>
-    <input type="number" inputmode="decimal" step="0.01" min="0" name="cycle_time" required placeholder="例: 32.50">
-  </div>
-
-  <div class="row">
-    <label>現在ショット数</label>
-    <input type="number" inputmode="numeric" step="1" min="0" name="shot_count" required placeholder="例: 50">
-  </div>
-
-  <hr>
-  <h3>任意入力（将来の成形条件ブロックに統合予定）</h3>
-
-  <div class="row">
-    <label>材料名</label>
-    <input type="text" name="material" placeholder="例: PBT-GF30">
-  </div>
-
-  <div class="row">
-    <label>樹脂温度(℃)</label>
-    <input type="number" inputmode="decimal" step="0.1" name="melt_temp" placeholder="例: 255">
-  </div>
-
-  <div class="row">
-    <label>金型温度(℃)</label>
-    <input type="number" inputmode="decimal" step="0.1" name="mold_temp" placeholder="例: 80">
-  </div>
-
-  <div class="row">
-    <label>射出圧(MPa)</label>
-    <input type="number" inputmode="decimal" step="0.1" name="inj_pressure" placeholder="例: 90">
-  </div>
-
-  <div class="row">
-    <label>保圧(MPa)</label>
-    <input type="number" inputmode="decimal" step="0.1" name="hold_pressure" placeholder="例: 60">
-  </div>
-
-  <div class="row">
-    <label>メモ</label>
-    <textarea name="note" rows="3" placeholder="特記事項を記載"></textarea>
-  </div>
-
-  <div class="row" style="position:sticky; bottom:8px; background:var(--bg); padding-top:8px;">
-    <label></label>
-    <button class="btn primary" type="submit">保存</button>
-  </div>
-</form>
+<script>
+  // モバイル時のスクロールを抑制し、連続入力で前回値を保持する
+  if (window.history.replaceState) {
+    window.history.replaceState(null, document.title, window.location.pathname + window.location.search);
+  }
+</script>
 {% endblock %}
