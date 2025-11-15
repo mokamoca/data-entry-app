@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .feedback-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .feedback-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .feedback-form label {
+    font-weight: 600;
+  }
+  .feedback-form select,
+  .feedback-form textarea,
+  .feedback-form input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    background: var(--input-bg);
+    color: var(--input-fg);
+  }
+  .feedback-form button {
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    color: #fff;
+    cursor: pointer;
+  }
+  .note-box {
+    font-size: .9rem;
+    color: var(--muted);
+    background: rgba(37,99,235,0.08);
+    border-radius: 14px;
+    padding: 12px 14px;
+  }
+</style>
+
+<div class="card feedback-card">
+  <div>
+    <h2 style="margin:0 0 6px;">改善フィードバック</h2>
+    <p style="margin:0;color:var(--muted);">使っていて気になる点や追加したい機能があれば、お気軽にお知らせください。</p>
+  </div>
+
+  <div class="note-box">
+    個人情報の記入は行わないでください。
+  </div>
+
+  <form method="post" class="feedback-form">
+    {{ form.hidden_tag() }}
+    <div>
+      {{ form.category.label }}
+      {{ form.category() }}
+      {% if form.category.errors %}<div class="errors">{{ form.category.errors[0] }}</div>{% endif %}
+    </div>
+    <div>
+      {{ form.details.label }}
+      {{ form.details() }}
+      {% if form.details.errors %}<div class="errors">{{ form.details.errors[0] }}</div>{% endif %}
+    </div>
+    <button type="submit">{{ form.submit.label.text }}</button>
+  </form>
+</div>
+{% endblock %}
