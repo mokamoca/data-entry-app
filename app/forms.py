@@ -35,7 +35,31 @@ class EntryForm(FlaskForm):
     shift = SelectField("勤務帯", validators=[validators.DataRequired(message=REQUIRED_MESSAGE)])
     machine_no = SelectField("号機", validators=[validators.DataRequired(message=REQUIRED_MESSAGE)])
     model_name = SelectField("機種名", validators=[validators.DataRequired(message=REQUIRED_MESSAGE)])
-
+    environment_temp = DecimalField(
+        "環境温度 (℃)",
+        places=1,
+        rounding=None,
+        validators=[
+            validators.InputRequired(message=REQUIRED_MESSAGE),
+            validators.NumberRange(min=-50, max=80),
+        ],
+        render_kw={"step": "0.1", "inputmode": "decimal"},
+    )
+    environment_humidity = DecimalField(
+        "環境湿度 (%)",
+        places=1,
+        rounding=None,
+        validators=[
+            validators.InputRequired(message=REQUIRED_MESSAGE),
+            validators.NumberRange(min=0, max=100),
+        ],
+        render_kw={"step": "0.1", "inputmode": "decimal"},
+    )
+    material_lot = StringField(
+        "材料ロット",
+        validators=[validators.DataRequired(message=REQUIRED_MESSAGE), validators.Length(max=120)],
+        render_kw={"placeholder": "例: LOT-20251115-A"},
+    )
     inj_time = DecimalField(
         "射出時間 (s)",
         places=3,
@@ -113,12 +137,6 @@ class EntryForm(FlaskForm):
             validators.NumberRange(min=0),
         ],
         render_kw={"step": "1", "placeholder": "50", "inputmode": "numeric"},
-    )
-
-    material = StringField(
-        "材料名",
-        validators=[validators.Optional(), validators.Length(max=50)],
-        render_kw={"placeholder": "PBT-GF30"},
     )
     melt_temp = DecimalField(
         "樹脂温度 (℃)",

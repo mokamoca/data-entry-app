@@ -135,13 +135,33 @@
           {{ form.model_name() }}
           {% if form.model_name.errors %}<div class="errors">{{ form.model_name.errors[0] }}</div>{% endif %}
         </label>
+        <label class="field">
+          {{ form.environment_temp.label }}
+          {{ form.environment_temp(step="0.1") }}
+          {% if form.environment_temp.errors %}<div class="errors">{{ form.environment_temp.errors[0] }}</div>{% endif %}
+        </label>
+        <label class="field">
+          {{ form.environment_humidity.label }}
+          {{ form.environment_humidity(step="0.1") }}
+          {% if form.environment_humidity.errors %}<div class="errors">{{ form.environment_humidity.errors[0] }}</div>{% endif %}
+        </label>
+        <label class="field">
+          {{ form.material_lot.label }}
+          {{ form.material_lot() }}
+          {% if form.material_lot.errors %}<div class="errors">{{ form.material_lot.errors[0] }}</div>{% endif %}
+        </label>
+        <label class="field">
+          {{ form.shot_count.label }}
+          {{ form.shot_count() }}
+          {% if form.shot_count.errors %}<div class="errors">{{ form.shot_count.errors[0] }}</div>{% endif %}
+        </label>
       </div>
     </div>
 
     <div class="section">
       <h3>実測値</h3>
       <div class="field-grid">
-        {% for field in [form.inj_time, form.metering_time, form.vp_position, form.vp_pressure, form.min_cushion, form.peak_pressure, form.cycle_time, form.shot_count] %}
+        {% for field in [form.inj_time, form.metering_time, form.vp_position, form.vp_pressure, form.min_cushion, form.peak_pressure, form.cycle_time] %}
           <label class="field">
             {{ field.label }}
             {{ field(step=field.render_kw.step if field.render_kw else None) }}
@@ -154,13 +174,8 @@
     </div>
 
     <div class="section">
-      <h3>任意入力</h3>
+      <h3>成形条件</h3>
       <div class="field-grid">
-        <label class="field">
-          {{ form.material.label }}
-          {{ form.material(placeholder="例: PBT-GF30") }}
-          {% if form.material.errors %}<div class="errors">{{ form.material.errors[0] }}</div>{% endif %}
-        </label>
         <label class="field">
           {{ form.melt_temp.label }}
           {{ form.melt_temp(step="0.1") }}
@@ -183,7 +198,7 @@
         </label>
         <label class="field" style="grid-column:1 / -1;">
           {{ form.note.label }}
-          {{ form.note(placeholder="特記事項や異常を記載") }}
+          {{ form.note(placeholder="特記事項や変更点を記載") }}
           {% if form.note.errors %}<div class="errors">{{ form.note.errors[0] }}</div>{% endif %}
         </label>
       </div>
@@ -199,6 +214,24 @@
   // モバイル時のスクロールを抑制し、連続入力で前回値を保持する
   if (window.history.replaceState) {
     window.history.replaceState(null, document.title, window.location.pathname + window.location.search);
+  }
+
+  const machineSelect = document.querySelector('select[name="machine_no"]');
+  const modelSelect = document.querySelector('select[name="model_name"]');
+
+  function reloadForPrefill() {
+    if (!machineSelect || !modelSelect) return;
+    const params = new URLSearchParams(window.location.search);
+    params.set('machine', machineSelect.value);
+    params.set('model', modelSelect.value);
+    window.location = `${window.location.pathname}?${params.toString()}`;
+  }
+
+  if (machineSelect) {
+    machineSelect.addEventListener('change', reloadForPrefill);
+  }
+  if (modelSelect) {
+    modelSelect.addEventListener('change', reloadForPrefill);
   }
 </script>
 {% endblock %}

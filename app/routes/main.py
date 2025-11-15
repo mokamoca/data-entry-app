@@ -63,6 +63,33 @@ def _guess_shift(shift_choices: List[str]):
     return shift_choices[2]
 
 
+def _prefill_conditions(form: EntryForm, machine_no: int, model_name: str):
+    if not machine_no or not model_name:
+        return
+    with session_scope() as db_session:
+        latest = (
+            db_session.query(Entry)
+            .filter(Entry.machine_no == machine_no, Entry.model_name == model_name)
+            .order_by(Entry.work_date.desc(), Entry.id.desc())
+            .first()
+        )
+    if not latest:
+        return
+    mappings = {
+        "melt_temp": latest.melt_temp,
+        "mold_temp": latest.mold_temp,
+        "inj_pressure": latest.inj_pressure,
+        "hold_pressure": latest.hold_pressure,
+        "note": latest.note,
+    }
+    for field_name, value in mappings.items():
+        field = getattr(form, field_name, None)
+        if field is None or value is None:
+            continue
+        if field.data in (None, ""):
+            field.data = value
+
+
 @bp.route("/home")
 def home():
     patch_notes = current_app.config.get("PATCH_NOTES", [])
@@ -91,10 +118,18 @@ def index():
     if preselected_machine is None:
         return redirect(url_for("main.select_machine"))
 
+    requested_model = request.args.get("model")
+    valid_models = {choice[0] for choice in form.model_name.choices}
+
     if request.method == "GET":
         form.machine_no.data = str(preselected_machine)
         if not form.shift.data:
             form.shift.data = _guess_shift(shift_choices)
+        if requested_model in valid_models:
+            form.model_name.data = requested_model
+        elif not form.model_name.data and form.model_name.choices:
+            form.model_name.data = form.model_name.choices[0][0]
+        _prefill_conditions(form, preselected_machine, form.model_name.data)
 
     if form.validate_on_submit():
         with session_scope() as db_session:
@@ -103,6 +138,13 @@ def index():
                 shift=form.shift.data,
                 machine_no=int(form.machine_no.data),
                 model_name=form.model_name.data,
+                environment_temp=float(form.environment_temp.data)
+                if form.environment_temp.data is not None
+                else None,
+                environment_humidity=float(form.environment_humidity.data)
+                if form.environment_humidity.data is not None
+                else None,
+                material_lot=form.material_lot.data or None,
                 inj_time=float(form.inj_time.data),
                 metering_time=float(form.metering_time.data),
                 vp_position=float(form.vp_position.data),
@@ -111,7 +153,6 @@ def index():
                 peak_pressure=float(form.peak_pressure.data),
                 cycle_time=float(form.cycle_time.data),
                 shot_count=form.shot_count.data,
-                material=form.material.data or None,
                 melt_temp=float(form.melt_temp.data) if form.melt_temp.data is not None else None,
                 mold_temp=float(form.mold_temp.data) if form.mold_temp.data is not None else None,
                 inj_pressure=float(form.inj_pressure.data) if form.inj_pressure.data is not None else None,
@@ -176,6 +217,9 @@ def _stream_csv(rows, filename):
         "shift",
         "machine_no",
         "model_name",
+        "environment_temp",
+        "environment_humidity",
+        "material_lot",
         "inj_time",
         "metering_time",
         "vp_position",
@@ -184,7 +228,6 @@ def _stream_csv(rows, filename):
         "peak_pressure",
         "cycle_time",
         "shot_count",
-        "material",
         "melt_temp",
         "mold_temp",
         "inj_pressure",
