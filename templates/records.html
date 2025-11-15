@@ -77,6 +77,9 @@
           <th>勤</th>
           <th>号機</th>
           <th>機種</th>
+          <th>環境温</th>
+          <th>環境湿</th>
+          <th>材料ロット</th>
           <th>射出(s)</th>
           <th>計量(s)</th>
           <th>V-P位置</th>
@@ -85,7 +88,6 @@
           <th>ピーク</th>
           <th>CT</th>
           <th>ショット</th>
-          <th>材料</th>
           <th>樹脂</th>
           <th>金型</th>
           <th>射出圧</th>
@@ -100,6 +102,9 @@
             <td>{{ r.shift }}</td>
             <td><span class="pill">#{{ r.machine_no }}</span></td>
             <td>{{ r.model_name }}</td>
+            <td>{{ "%.1f"|format(r.environment_temp) if r.environment_temp is not none else "-" }}</td>
+            <td>{{ "%.1f"|format(r.environment_humidity) if r.environment_humidity is not none else "-" }}</td>
+            <td>{{ r.material_lot or "" }}</td>
             <td>{{ "%.3f"|format(r.inj_time) if r.inj_time is not none else "-" }}</td>
             <td>{{ "%.2f"|format(r.metering_time) if r.metering_time is not none else "-" }}</td>
             <td>{{ "%.3f"|format(r.vp_position) if r.vp_position is not none else "-" }}</td>
@@ -108,7 +113,6 @@
             <td>{{ "%.1f"|format(r.peak_pressure) if r.peak_pressure is not none else "-" }}</td>
             <td>{{ "%.2f"|format(r.cycle_time) if r.cycle_time is not none else "-" }}</td>
             <td>{{ r.shot_count if r.shot_count is not none else "-" }}</td>
-            <td>{{ r.material or "" }}</td>
             <td>{{ r.melt_temp or "" }}</td>
             <td>{{ r.mold_temp or "" }}</td>
             <td>{{ r.inj_pressure or "" }}</td>
@@ -117,7 +121,7 @@
           </tr>
         {% else %}
           <tr>
-            <td colspan="18" style="text-align:center; padding:24px;">該当データがありません。</td>
+            <td colspan="20" style="text-align:center; padding:24px;">該当データがありません。</td>
           </tr>
         {% endfor %}
       </tbody>

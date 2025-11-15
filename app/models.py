@@ -11,6 +11,9 @@ class Entry(Base):
     shift = Column(String(1), nullable=False)
     machine_no = Column(Integer, nullable=False, index=True)
     model_name = Column(String(50), nullable=False)
+    environment_temp = Column(Float, nullable=True)
+    environment_humidity = Column(Float, nullable=True)
+    material_lot = Column(String(120), nullable=True)
 
     inj_time = Column(Float, nullable=False)
     metering_time = Column(Float, nullable=False)
@@ -20,8 +23,6 @@ class Entry(Base):
     peak_pressure = Column(Float, nullable=False)
     cycle_time = Column(Float, nullable=False)
     shot_count = Column(Integer, nullable=False)
-
-    material = Column(String(50), nullable=True)
     melt_temp = Column(Float, nullable=True)
     mold_temp = Column(Float, nullable=True)
     inj_pressure = Column(Float, nullable=True)
@@ -40,6 +41,9 @@ class Entry(Base):
             "shift": self.shift,
             "machine_no": self.machine_no,
             "model_name": self.model_name,
+            "environment_temp": self.environment_temp if self.environment_temp is not None else "",
+            "environment_humidity": self.environment_humidity if self.environment_humidity is not None else "",
+            "material_lot": self.material_lot or "",
             "inj_time": self.inj_time,
             "metering_time": self.metering_time,
             "vp_position": self.vp_position,
@@ -48,7 +52,6 @@ class Entry(Base):
             "peak_pressure": self.peak_pressure,
             "cycle_time": self.cycle_time,
             "shot_count": self.shot_count,
-            "material": self.material or "",
             "melt_temp": self.melt_temp if self.melt_temp is not None else "",
             "mold_temp": self.mold_temp if self.mold_temp is not None else "",
             "inj_pressure": self.inj_pressure if self.inj_pressure is not None else "",
