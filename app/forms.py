@@ -183,3 +183,17 @@ class RecordsFilterForm(FlaskForm):
         super().__init__(**kwargs)
         self.machine_no.choices = _build_choice_tuples(machine_choices, include_blank=True)
         self.shift.choices = _build_choice_tuples(shift_choices, include_blank=True)
+
+
+class FeedbackForm(FlaskForm):
+    category = SelectField("カテゴリ", validators=[validators.DataRequired(message=REQUIRED_MESSAGE)])
+    details = TextAreaField(
+        "内容",
+        validators=[validators.DataRequired(message=REQUIRED_MESSAGE), validators.Length(max=1000)],
+        render_kw={"rows": 6, "placeholder": "気になる点・困りごと・改善案など"},
+    )
+    submit = SubmitField("フィードバックを送信")
+
+    def __init__(self, *, category_choices: Iterable, **kwargs):
+        super().__init__(**kwargs)
+        self.category.choices = list(category_choices)

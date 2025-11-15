@@ -44,3 +44,43 @@ class Config:
     RECORDS_LIMIT = int(os.environ.get("RECORDS_LIMIT", "250"))
     EXPORT_FILENAME = os.environ.get("EXPORT_FILENAME", "production-log-export.csv")
 
+    PATCH_NOTES = [
+        {
+            "version": "3.0.1",
+            "date": "2025-11-15",
+            "items": [
+                "ヘッダーからトップページに遷移できるよう改善",
+                "パッチノート／使い方／フィードバック導線を追加",
+            ],
+        },
+        {
+            "version": "3.0.0",
+            "date": "2025-11-10",
+            "items": [
+                "UI 全面刷新とフォームの必須バリデーションを強化",
+                "CSV 出力やフィルタリングの導線を整理",
+            ],
+        },
+    ]
+
+    USAGE_GUIDE = [
+        {
+            "title": "1. 号機を選ぶ",
+            "details": "QR か 号機選択画面から入力対象の号機を指定します。",
+        },
+        {
+            "title": "2. 実測値を入力",
+            "details": "入力フォームで勤務帯やモニタ値を登録し、保存ボタンで記録します。",
+        },
+        {
+            "title": "3. 一覧・CSV",
+            "details": "一覧画面と CSV を活用して過去データを確認・共有できます。",
+        },
+    ]
+
+    FEEDBACK_CATEGORIES = [
+        ("idea", "機能追加の要望"),
+        ("ux", "使いやすさ / UI"),
+        ("bug", "不具合・トラブル"),
+        ("other", "その他"),
+    ]

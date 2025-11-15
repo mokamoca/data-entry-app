@@ -58,3 +58,11 @@ class Entry(Base):
             "updated_at": self.updated_at.isoformat() if self.updated_at else "",
         }
 
+
+class Feedback(Base):
+    __tablename__ = "feedback"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    category = Column(String(50), nullable=False)
+    details = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

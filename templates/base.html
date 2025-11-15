@@ -61,11 +61,14 @@
       gap: 12px;
       flex-wrap: wrap;
     }
-    header h1 {
+    header .brand {
       font-size: 1.1rem;
       letter-spacing: .08em;
       margin: 0;
       text-transform: uppercase;
+      text-decoration: none;
+      color: #f8fafc;
+      font-weight: 600;
     }
     nav {
       display: flex;
@@ -138,12 +141,13 @@
 <body>
   <header>
     <div class="inner">
-      <h1>PRODUCTION LOG 3.0 α</h1>
+      <a class="brand" href="{{ url_for('main.home') }}">PRODUCTION LOG</a>
       <nav>
         <a class="nav-link {% if request.endpoint == 'main.select_machine' %}active{% endif %}" href="{{ url_for('main.select_machine') }}">号機選択</a>
         <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" href="{{ url_for('main.index') }}">入力</a>
         <a class="nav-link {% if request.endpoint == 'main.records' %}active{% endif %}" href="{{ url_for('main.records') }}">一覧</a>
         <a class="nav-link" href="{{ url_for('main.export', **request.args.to_dict()) }}">CSV</a>
+        <a class="nav-link {% if request.endpoint == 'main.feedback_manage' %}active{% endif %}" href="{{ url_for('main.feedback_manage') }}">FB管理</a>
       </nav>
     </div>
   </header>

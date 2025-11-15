@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .hero {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .primary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 18px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 18px;
+    border-radius: 999px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .two-column {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+  }
+  .note-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .note-item {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    background: var(--card);
+  }
+  .note-item h4 {
+    margin: 0 0 6px;
+    font-size: 1rem;
+  }
+  .usage-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .usage-steps li {
+    border-left: 3px solid var(--accent);
+    padding-left: 14px;
+  }
+</style>
+
+<div class="card hero">
+  <p style="margin:0;color:var(--muted);font-size:.85rem;">
+    version {{ latest_version or "3.x" }} ／ 最終更新: {{ latest_date or "-" }}
+  </p>
+  <h2 style="margin:0;font-size:1.8rem;">Production Log の最新情報</h2>
+  <div class="hero-actions">
+    <a class="primary-btn" style="background:var(--success);" href="{{ url_for('main.feedback') }}">改善フィードバックはこちら</a>
+  </div>
+</div>
+
+<div class="two-column">
+  <section class="card">
+    <h3 style="margin-top:0;">パッチノート</h3>
+    <ul class="note-list">
+      {% for note in patch_notes %}
+        <li class="note-item">
+          <h4>{{ note.version }} <small style="color:var(--muted);">({{ note.date }})</small></h4>
+          <ul style="margin:0;padding-left:18px;">
+            {% for item in note["items"] %}
+              <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </li>
+      {% else %}
+        <li class="note-item">お知らせはまだありません。</li>
+      {% endfor %}
+    </ul>
+  </section>
+  <section class="card">
+    <h3 style="margin-top:0;">使い方</h3>
+    <ul class="usage-steps">
+      {% for step in usage_steps %}
+        <li>
+          <strong>{{ step.title }}</strong>
+          <p style="margin:4px 0 0; color:var(--muted);">{{ step.details }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endblock %}

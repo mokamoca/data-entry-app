@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .primary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .feedback-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .9rem;
+  }
+  .feedback-table th,
+  .feedback-table td {
+    border-bottom: 1px solid var(--border);
+    padding: 10px;
+    vertical-align: top;
+  }
+  .badge {
+    display: inline-flex;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: .75rem;
+    background: rgba(37,99,235,0.15);
+    color: var(--accent-strong);
+  }
+  .meta {
+    font-size: .8rem;
+    color: var(--muted);
+  }
+</style>
+
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div>
+      <h2 style="margin:0;">改善フィードバック一覧</h2>
+      <p style="margin:4px 0 0;color:var(--muted);font-size:.9rem;">最新順に最大 200 件まで表示します。</p>
+    </div>
+    <a class="primary-btn" href="{{ url_for('main.feedback') }}">新規フィードバック</a>
+  </div>
+
+  <div style="overflow-x:auto;margin-top:16px;">
+    <table class="feedback-table">
+      <thead>
+        <tr>
+          <th style="width:130px;">日時</th>
+          <th style="width:120px;">カテゴリ</th>
+          <th>内容</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in entries %}
+          <tr>
+            <td class="meta">{{ item.created_at.strftime('%Y-%m-%d %H:%M') if item.created_at else '-' }}</td>
+            <td><span class="badge">{{ item.category }}</span></td>
+            <td>{{ item.details | replace('\n', '<br>') | safe }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="3" style="text-align:center; padding:24px;">まだフィードバックはありません。</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

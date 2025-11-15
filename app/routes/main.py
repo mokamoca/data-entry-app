@@ -19,8 +19,8 @@ from flask import (
 )
 
 from ..database import create_all, session_scope
-from ..forms import EntryForm, RecordsFilterForm
-from ..models import Entry
+from ..forms import EntryForm, FeedbackForm, RecordsFilterForm
+from ..models import Entry, Feedback
 
 bp = Blueprint("main", __name__)
 
@@ -61,6 +61,21 @@ def _guess_shift(shift_choices: List[str]):
     if time(14, 0) <= now < time(22, 0):
         return shift_choices[1]
     return shift_choices[2]
+
+
+@bp.route("/home")
+def home():
+    patch_notes = current_app.config.get("PATCH_NOTES", [])
+    usage_steps = current_app.config.get("USAGE_GUIDE", [])
+    latest_version = patch_notes[0].get("version") if patch_notes else ""
+    latest_date = patch_notes[0].get("date") if patch_notes else ""
+    return render_template(
+        "home.html",
+        patch_notes=patch_notes,
+        usage_steps=usage_steps,
+        latest_version=latest_version,
+        latest_date=latest_date,
+    )
 
 
 @bp.route("/", methods=["GET", "POST"])
@@ -214,6 +229,31 @@ def export():
         rows = query.all()
     filename = current_app.config.get("EXPORT_FILENAME", "production-log-export.csv")
     return _stream_csv(rows, filename)
+
+
+@bp.route("/feedback", methods=["GET", "POST"])
+def feedback():
+    category_choices = current_app.config.get("FEEDBACK_CATEGORIES") or []
+    form = FeedbackForm(category_choices=category_choices)
+
+    if form.validate_on_submit():
+        with session_scope() as db_session:
+            fb = Feedback(
+                category=form.category.data,
+                details=form.details.data,
+            )
+            db_session.add(fb)
+        flash("フィードバックを送信しました。", "success")
+        return redirect(url_for("main.feedback"))
+
+    return render_template("feedback.html", form=form)
+
+
+@bp.route("/feedback/manage")
+def feedback_manage():
+    with session_scope() as db_session:
+        entries = db_session.query(Feedback).order_by(Feedback.created_at.desc()).limit(200).all()
+    return render_template("feedback_manage.html", entries=entries)
 
 
 @bp.route("/ping")
