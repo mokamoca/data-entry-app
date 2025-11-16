@@ -54,6 +54,18 @@
     font-weight: 500;
     color: var(--muted);
   }
+  .condition-group {
+    margin-bottom: 24px;
+  }
+  .condition-group:last-of-type {
+    margin-bottom: 0;
+  }
+  .condition-group h4 {
+    margin: 0 0 12px;
+    font-size: .95rem;
+    letter-spacing: .05em;
+    color: var(--fg);
+  }
   .header-grid {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -175,32 +187,92 @@
 
     <div class="section">
       <h3>成形条件</h3>
-      <div class="field-grid">
-        <label class="field">
-          {{ form.melt_temp.label }}
-          {{ form.melt_temp(step="0.1") }}
-          {% if form.melt_temp.errors %}<div class="errors">{{ form.melt_temp.errors[0] }}</div>{% endif %}
-        </label>
-        <label class="field">
-          {{ form.mold_temp.label }}
-          {{ form.mold_temp(step="0.1") }}
-          {% if form.mold_temp.errors %}<div class="errors">{{ form.mold_temp.errors[0] }}</div>{% endif %}
-        </label>
-        <label class="field">
-          {{ form.inj_pressure.label }}
-          {{ form.inj_pressure(step="0.1") }}
-          {% if form.inj_pressure.errors %}<div class="errors">{{ form.inj_pressure.errors[0] }}</div>{% endif %}
-        </label>
-        <label class="field">
-          {{ form.hold_pressure.label }}
-          {{ form.hold_pressure(step="0.1") }}
-          {% if form.hold_pressure.errors %}<div class="errors">{{ form.hold_pressure.errors[0] }}</div>{% endif %}
-        </label>
-        <label class="field" style="grid-column:1 / -1;">
-          {{ form.note.label }}
-          {{ form.note(placeholder="特記事項や変更点を記載") }}
-          {% if form.note.errors %}<div class="errors">{{ form.note.errors[0] }}</div>{% endif %}
-        </label>
+      <div class="condition-group">
+        <h4>温度セクション</h4>
+        <div class="field-grid">
+          {% for field in [
+            form.mold_temp_fixed,
+            form.mold_temp_moving,
+            form.nozzle_temp,
+            form.cylinder_front_temp,
+            form.cylinder_mid1_temp,
+            form.cylinder_mid2_temp,
+            form.cylinder_rear_temp
+          ] %}
+            <label class="field">
+              {{ field.label }}
+              {{ field(step=field.render_kw.step if field.render_kw else None) }}
+              {% if field.errors %}<div class="errors">{{ field.errors[0] }}</div>{% endif %}
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="condition-group">
+        <h4>充填セクション</h4>
+        <div class="field-grid">
+          {% for field in [
+            form.injection_speed_1,
+            form.injection_speed_2,
+            form.injection_switch_position,
+            form.injection_pressure_setting,
+            form.injection_time_setting
+          ] %}
+            <label class="field">
+              {{ field.label }}
+              {{ field(step=field.render_kw.step if field.render_kw else None) }}
+              {% if field.errors %}<div class="errors">{{ field.errors[0] }}</div>{% endif %}
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="condition-group">
+        <h4>保圧セクション</h4>
+        <div class="field-grid">
+          {% for field in [
+            form.hold_pressure_1,
+            form.hold_pressure_2,
+            form.hold_time_1,
+            form.hold_time_2,
+            form.hold_pressure_total
+          ] %}
+            <label class="field">
+              {{ field.label }}
+              {{ field(step=field.render_kw.step if field.render_kw else None) }}
+              {% if field.errors %}<div class="errors">{{ field.errors[0] }}</div>{% endif %}
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="condition-group">
+        <h4>計量セクション</h4>
+        <div class="field-grid">
+          {% for field in [
+            form.metering_position,
+            form.back_pressure,
+            form.screw_rotation_speed,
+            form.cooling_time
+          ] %}
+            <label class="field">
+              {{ field.label }}
+              {{ field(step=field.render_kw.step if field.render_kw else None) }}
+              {% if field.errors %}<div class="errors">{{ field.errors[0] }}</div>{% endif %}
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="condition-group">
+        <h4>変化点管理</h4>
+        <div class="field-grid">
+          <label class="field" style="grid-column:1 / -1;">
+            {{ form.change_note.label }}
+            {{ form.change_note() }}
+            {% if form.change_note.errors %}<div class="errors">{{ form.change_note.errors[0] }}</div>{% endif %}
+          </label>
+        </div>
       </div>
     </div>
 

@@ -138,38 +138,159 @@ class EntryForm(FlaskForm):
         ],
         render_kw={"step": "1", "placeholder": "50", "inputmode": "numeric"},
     )
-    melt_temp = DecimalField(
-        "樹脂温度 (℃)",
+    mold_temp_fixed = DecimalField(
+        "金型温度（固定側）(℃)",
         places=1,
         rounding=None,
         validators=[validators.Optional(), validators.NumberRange(min=0)],
         render_kw={"step": "0.1", "inputmode": "decimal"},
     )
-    mold_temp = DecimalField(
-        "金型温度 (℃)",
+    mold_temp_moving = DecimalField(
+        "金型温度（稼働側）(℃)",
         places=1,
         rounding=None,
         validators=[validators.Optional(), validators.NumberRange(min=0)],
         render_kw={"step": "0.1", "inputmode": "decimal"},
     )
-    inj_pressure = DecimalField(
-        "射出圧 (MPa)",
+    nozzle_temp = DecimalField(
+        "ノズル設定温度 (℃)",
         places=1,
         rounding=None,
         validators=[validators.Optional(), validators.NumberRange(min=0)],
         render_kw={"step": "0.1", "inputmode": "decimal"},
     )
-    hold_pressure = DecimalField(
-        "保圧 (MPa)",
+    cylinder_front_temp = DecimalField(
+        "シリンダ前部温度 (℃)",
         places=1,
         rounding=None,
         validators=[validators.Optional(), validators.NumberRange(min=0)],
         render_kw={"step": "0.1", "inputmode": "decimal"},
     )
-    note = TextAreaField(
-        "メモ",
-        validators=[validators.Optional(), validators.Length(max=500)],
-        render_kw={"placeholder": "特記事項や異常内容を記載"},
+    cylinder_mid1_temp = DecimalField(
+        "シリンダ中部１温度 (℃)",
+        places=1,
+        rounding=None,
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "0.1", "inputmode": "decimal"},
+    )
+    cylinder_mid2_temp = DecimalField(
+        "シリンダ中部２温度 (℃)",
+        places=1,
+        rounding=None,
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "0.1", "inputmode": "decimal"},
+    )
+    cylinder_rear_temp = DecimalField(
+        "シリンダ後部温度 (℃)",
+        places=1,
+        rounding=None,
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "0.1", "inputmode": "decimal"},
+    )
+
+    injection_speed_1 = DecimalField(
+        "射出速度１ (mm/s)",
+        places=1,
+        rounding=None,
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "0.1", "inputmode": "decimal"},
+    )
+    injection_speed_2 = DecimalField(
+        "射出速度２ (mm/s)",
+        places=1,
+        rounding=None,
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "0.1", "inputmode": "decimal"},
+    )
+    injection_switch_position = DecimalField(
+        "射出切替位置 (mm)",
+        places=2,
+        rounding=None,
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "0.01", "inputmode": "decimal"},
+    )
+    injection_pressure_setting = DecimalField(
+        "射出圧力 (MPa)",
+        places=1,
+        rounding=None,
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "0.1", "inputmode": "decimal"},
+    )
+    injection_time_setting = DecimalField(
+        "射出時間 (s)",
+        places=2,
+        rounding=None,
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "0.01", "inputmode": "decimal"},
+    )
+
+    hold_pressure_1 = DecimalField(
+        "保圧１ (MPa)",
+        places=1,
+        rounding=None,
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "0.1", "inputmode": "decimal"},
+    )
+    hold_pressure_2 = DecimalField(
+        "保圧２ (MPa)",
+        places=1,
+        rounding=None,
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "0.1", "inputmode": "decimal"},
+    )
+    hold_time_1 = DecimalField(
+        "保圧１時間 (s)",
+        places=1,
+        rounding=None,
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "0.1", "inputmode": "decimal"},
+    )
+    hold_time_2 = DecimalField(
+        "保圧２時間 (s)",
+        places=1,
+        rounding=None,
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "0.1", "inputmode": "decimal"},
+    )
+    hold_pressure_total = DecimalField(
+        "保圧圧力 (MPa)",
+        places=1,
+        rounding=None,
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "0.1", "inputmode": "decimal"},
+    )
+
+    metering_position = DecimalField(
+        "計量位置 (mm)",
+        places=2,
+        rounding=None,
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "0.01", "inputmode": "decimal"},
+    )
+    back_pressure = DecimalField(
+        "背圧 (MPa)",
+        places=1,
+        rounding=None,
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "0.1", "inputmode": "decimal"},
+    )
+    screw_rotation_speed = IntegerField(
+        "回転速度 (rpm)",
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "1", "inputmode": "numeric"},
+    )
+    cooling_time = DecimalField(
+        "冷却時間 (s)",
+        places=1,
+        rounding=None,
+        validators=[validators.Optional(), validators.NumberRange(min=0)],
+        render_kw={"step": "0.1", "inputmode": "decimal"},
+    )
+
+    change_note = TextAreaField(
+        "変化点メモ",
+        validators=[validators.Optional(), validators.Length(max=1000)],
+        render_kw={"placeholder": "材料ロット変更や品質変化など、気になったことを記載"},
     )
 
     submit = SubmitField("保存")

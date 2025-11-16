@@ -88,11 +88,28 @@
           <th>ピーク</th>
           <th>CT</th>
           <th>ショット</th>
-          <th>樹脂</th>
-          <th>金型</th>
-          <th>射出圧</th>
-          <th>保圧</th>
-          <th>メモ</th>
+          <th>金型温(固)</th>
+          <th>金型温(稼)</th>
+          <th>ノズル温</th>
+          <th>シリ前</th>
+          <th>シリ中1</th>
+          <th>シリ中2</th>
+          <th>シリ後</th>
+          <th>射速1</th>
+          <th>射速2</th>
+          <th>切替位</th>
+          <th>射圧</th>
+          <th>射時</th>
+          <th>保圧1</th>
+          <th>保圧2</th>
+          <th>保圧1s</th>
+          <th>保圧2s</th>
+          <th>保圧圧</th>
+          <th>計量位</th>
+          <th>背圧</th>
+          <th>回転</th>
+          <th>冷却</th>
+          <th>変化点メモ</th>
         </tr>
       </thead>
       <tbody>
@@ -113,15 +130,32 @@
             <td>{{ "%.1f"|format(r.peak_pressure) if r.peak_pressure is not none else "-" }}</td>
             <td>{{ "%.2f"|format(r.cycle_time) if r.cycle_time is not none else "-" }}</td>
             <td>{{ r.shot_count if r.shot_count is not none else "-" }}</td>
-            <td>{{ r.melt_temp or "" }}</td>
-            <td>{{ r.mold_temp or "" }}</td>
-            <td>{{ r.inj_pressure or "" }}</td>
-            <td>{{ r.hold_pressure or "" }}</td>
-            <td>{{ r.note or "" }}</td>
+            <td>{{ r.mold_temp_fixed or "" }}</td>
+            <td>{{ r.mold_temp_moving or "" }}</td>
+            <td>{{ r.nozzle_temp or "" }}</td>
+            <td>{{ r.cylinder_front_temp or "" }}</td>
+            <td>{{ r.cylinder_mid1_temp or "" }}</td>
+            <td>{{ r.cylinder_mid2_temp or "" }}</td>
+            <td>{{ r.cylinder_rear_temp or "" }}</td>
+            <td>{{ r.injection_speed_1 or "" }}</td>
+            <td>{{ r.injection_speed_2 or "" }}</td>
+            <td>{{ r.injection_switch_position or "" }}</td>
+            <td>{{ r.injection_pressure_setting or "" }}</td>
+            <td>{{ r.injection_time_setting or "" }}</td>
+            <td>{{ r.hold_pressure_1 or "" }}</td>
+            <td>{{ r.hold_pressure_2 or "" }}</td>
+            <td>{{ r.hold_time_1 or "" }}</td>
+            <td>{{ r.hold_time_2 or "" }}</td>
+            <td>{{ r.hold_pressure_total or "" }}</td>
+            <td>{{ r.metering_position or "" }}</td>
+            <td>{{ r.back_pressure or "" }}</td>
+            <td>{{ r.screw_rotation_speed or "" }}</td>
+            <td>{{ r.cooling_time or "" }}</td>
+            <td>{{ r.change_note or "" }}</td>
           </tr>
         {% else %}
           <tr>
-            <td colspan="20" style="text-align:center; padding:24px;">該当データがありません。</td>
+            <td colspan="37" style="text-align:center; padding:24px;">該当データがありません。</td>
           </tr>
         {% endfor %}
       </tbody>

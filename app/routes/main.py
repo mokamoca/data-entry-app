@@ -75,17 +75,37 @@ def _prefill_conditions(form: EntryForm, machine_no: int, model_name: str):
         )
     if not latest:
         return
-    mappings = {
-        "melt_temp": latest.melt_temp,
-        "mold_temp": latest.mold_temp,
-        "inj_pressure": latest.inj_pressure,
-        "hold_pressure": latest.hold_pressure,
-        "note": latest.note,
-    }
-    for field_name, value in mappings.items():
+    field_names = [
+        "mold_temp_fixed",
+        "mold_temp_moving",
+        "nozzle_temp",
+        "cylinder_front_temp",
+        "cylinder_mid1_temp",
+        "cylinder_mid2_temp",
+        "cylinder_rear_temp",
+        "injection_speed_1",
+        "injection_speed_2",
+        "injection_switch_position",
+        "injection_pressure_setting",
+        "injection_time_setting",
+        "hold_pressure_1",
+        "hold_pressure_2",
+        "hold_time_1",
+        "hold_time_2",
+        "hold_pressure_total",
+        "metering_position",
+        "back_pressure",
+        "screw_rotation_speed",
+        "cooling_time",
+        "change_note",
+    ]
+    for field_name in field_names:
+        value = getattr(latest, field_name, None)
         field = getattr(form, field_name, None)
         if field is None or value is None:
             continue
+        if field_name == "screw_rotation_speed" and value is not None:
+            value = int(value)
         if field.data in (None, ""):
             field.data = value
 
@@ -153,11 +173,60 @@ def index():
                 peak_pressure=float(form.peak_pressure.data),
                 cycle_time=float(form.cycle_time.data),
                 shot_count=form.shot_count.data,
-                melt_temp=float(form.melt_temp.data) if form.melt_temp.data is not None else None,
-                mold_temp=float(form.mold_temp.data) if form.mold_temp.data is not None else None,
-                inj_pressure=float(form.inj_pressure.data) if form.inj_pressure.data is not None else None,
-                hold_pressure=float(form.hold_pressure.data) if form.hold_pressure.data is not None else None,
-                note=form.note.data or None,
+                mold_temp_fixed=float(form.mold_temp_fixed.data)
+                if form.mold_temp_fixed.data is not None
+                else None,
+                mold_temp_moving=float(form.mold_temp_moving.data)
+                if form.mold_temp_moving.data is not None
+                else None,
+                nozzle_temp=float(form.nozzle_temp.data) if form.nozzle_temp.data is not None else None,
+                cylinder_front_temp=float(form.cylinder_front_temp.data)
+                if form.cylinder_front_temp.data is not None
+                else None,
+                cylinder_mid1_temp=float(form.cylinder_mid1_temp.data)
+                if form.cylinder_mid1_temp.data is not None
+                else None,
+                cylinder_mid2_temp=float(form.cylinder_mid2_temp.data)
+                if form.cylinder_mid2_temp.data is not None
+                else None,
+                cylinder_rear_temp=float(form.cylinder_rear_temp.data)
+                if form.cylinder_rear_temp.data is not None
+                else None,
+                injection_speed_1=float(form.injection_speed_1.data)
+                if form.injection_speed_1.data is not None
+                else None,
+                injection_speed_2=float(form.injection_speed_2.data)
+                if form.injection_speed_2.data is not None
+                else None,
+                injection_switch_position=float(form.injection_switch_position.data)
+                if form.injection_switch_position.data is not None
+                else None,
+                injection_pressure_setting=float(form.injection_pressure_setting.data)
+                if form.injection_pressure_setting.data is not None
+                else None,
+                injection_time_setting=float(form.injection_time_setting.data)
+                if form.injection_time_setting.data is not None
+                else None,
+                hold_pressure_1=float(form.hold_pressure_1.data)
+                if form.hold_pressure_1.data is not None
+                else None,
+                hold_pressure_2=float(form.hold_pressure_2.data)
+                if form.hold_pressure_2.data is not None
+                else None,
+                hold_time_1=float(form.hold_time_1.data) if form.hold_time_1.data is not None else None,
+                hold_time_2=float(form.hold_time_2.data) if form.hold_time_2.data is not None else None,
+                hold_pressure_total=float(form.hold_pressure_total.data)
+                if form.hold_pressure_total.data is not None
+                else None,
+                metering_position=float(form.metering_position.data)
+                if form.metering_position.data is not None
+                else None,
+                back_pressure=float(form.back_pressure.data) if form.back_pressure.data is not None else None,
+                screw_rotation_speed=int(form.screw_rotation_speed.data)
+                if form.screw_rotation_speed.data is not None
+                else None,
+                cooling_time=float(form.cooling_time.data) if form.cooling_time.data is not None else None,
+                change_note=form.change_note.data or None,
             )
             db_session.add(entry)
         flash("保存しました。", "success")
@@ -228,11 +297,28 @@ def _stream_csv(rows, filename):
         "peak_pressure",
         "cycle_time",
         "shot_count",
-        "melt_temp",
-        "mold_temp",
-        "inj_pressure",
-        "hold_pressure",
-        "note",
+        "mold_temp_fixed",
+        "mold_temp_moving",
+        "nozzle_temp",
+        "cylinder_front_temp",
+        "cylinder_mid1_temp",
+        "cylinder_mid2_temp",
+        "cylinder_rear_temp",
+        "injection_speed_1",
+        "injection_speed_2",
+        "injection_switch_position",
+        "injection_pressure_setting",
+        "injection_time_setting",
+        "hold_pressure_1",
+        "hold_pressure_2",
+        "hold_time_1",
+        "hold_time_2",
+        "hold_pressure_total",
+        "metering_position",
+            "back_pressure",
+        "screw_rotation_speed",
+        "cooling_time",
+        "change_note",
         "created_at",
         "updated_at",
     ]
